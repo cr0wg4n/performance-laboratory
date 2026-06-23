@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { useMovementSearch } from '@/composables/useMovementSearch'
 import { useUser } from '@/composables/useUser'
 import { useMovements } from '@/composables/useMovements'
+import SuccessCarousel from '@/components/SuccessCarousel.vue'
 import MovementList from '@/components/movements/MovementList.vue'
 import { formatCurrency } from '@/utils/format.util'
+import { getMovementQueryParams } from '@/utils/movement-query.util'
 
 interface Props {
   type: 'income' | 'outcome'
@@ -13,6 +17,7 @@ const props = defineProps<Props>()
 
 const { user, fetchUser } = useUser()
 const { movements, isLoading, error, fetchIncome, fetchOutcome, removeMovement } = useMovements()
+const route = useRoute()
 
 const deletingId = ref<number | null>(null)
 const deleteError = ref<string | null>(null)
@@ -20,23 +25,22 @@ const deleteError = ref<string | null>(null)
 const currency = computed(() => user.value?.currency ?? 'USD')
 const total = computed(() => movements.value.reduce((sum, m) => sum + m.amount, 0))
 
-const sortedMovements = computed(() =>
-  [...movements.value].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-)
+const { searchInput, filteredMovements, emptyStateMessage, handleSearchInput } = useMovementSearch(movements, currency)
 
 async function loadData() {
-  await Promise.all([fetchUser(), props.type === 'income' ? fetchIncome() : fetchOutcome()])
+  const params = getMovementQueryParams(route.query)
+  await Promise.all([fetchUser(), props.type === 'income' ? fetchIncome(params) : fetchOutcome(params)])
 }
 
 onMounted(loadData)
-watch(() => props.type, loadData)
+watch(() => [props.type, route.query.page, route.query.limit], loadData)
 
 async function handleDelete(id: number) {
   deletingId.value = id
   deleteError.value = null
   try {
     await removeMovement(id)
-    await fetchUser()
+    await loadData()
   } catch {
     deleteError.value = 'Failed to delete movement. Please try again.'
   } finally {
@@ -47,6 +51,8 @@ async function handleDelete(id: number) {
 
 <template>
   <div class="flex flex-col gap-6">
+    <SuccessCarousel />
+
     <div
       class="card shadow-sm border-t-4"
       :class="type === 'income' ? 'bg-success border-success' : 'bg-error border-error'"
@@ -99,15 +105,24 @@ async function handleDelete(id: number) {
 
     <div class="card bg-base-100 shadow-sm">
       <div class="card-body p-0">
-        <div class="flex items-center justify-between px-5 pt-5 pb-3">
-          <h2 class="font-semibold">{{ type === 'income' ? 'Income' : 'Expenses' }}</h2>
-          <span class="text-base-content/40 text-sm tabular-nums">{{ movements.length }} entries</span>
+        <div class="flex flex-col gap-4 px-5 pt-5 pb-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 class="font-semibold">{{ type === 'income' ? 'Income' : 'Expenses' }}</h2>
+            <p class="text-sm text-base-content/40 mt-0.5">Search by description, amount, date, or movement type.</p>
+          </div>
+          <label class="input input-bordered flex items-center gap-2 w-full md:max-w-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input :value="searchInput" type="search" class="grow" placeholder="Search movements" @input="handleSearchInput" />
+          </label>
         </div>
         <MovementList
-          :movements="sortedMovements"
+          :movements="filteredMovements"
           :currency="currency"
           :is-loading="isLoading"
           :deleting-id="deletingId"
+          :empty-message="emptyStateMessage"
           @delete="handleDelete"
         />
       </div>

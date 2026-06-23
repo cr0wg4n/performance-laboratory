@@ -7,13 +7,16 @@ interface Props {
   currency: string
   isLoading: boolean
   deletingId?: number | null
+  emptyMessage?: string
 }
 
 interface Emits {
   delete: [id: number]
 }
 
-defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  emptyMessage: 'No movements yet',
+})
 const emit = defineEmits<Emits>()
 
 function handleDelete(id: number) {
@@ -39,7 +42,7 @@ function handleDelete(id: number) {
         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
-        <p class="text-sm font-medium">No movements yet</p>
+        <p class="text-sm font-medium">{{ props.emptyMessage }}</p>
       </div>
     </template>
 

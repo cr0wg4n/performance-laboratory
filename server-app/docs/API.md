@@ -63,7 +63,7 @@ No query params. No body.
 
 ## GET /movements
 
-Returns all movements (income + outcome), unfiltered.
+Returns all movements (income + outcome), with optional date filtering and optional pagination.
 
 **Request**
 
@@ -71,7 +71,24 @@ Returns all movements (income + outcome), unfiltered.
 GET /movements
 ```
 
-No query params. No body.
+**Query params**
+
+| Param       | Type     | Required | Description |
+|-------------|----------|----------|-------------|
+| `startDate` | `string` | No       | Inclusive lower bound for `date`. Must be a valid ISO 8601 date. |
+| `endDate`   | `string` | No       | Inclusive upper bound for `date`. Must be a valid ISO 8601 date. |
+| `page`      | `number` | No       | 1-based page number. Must be a positive integer. Requires `limit`. |
+| `limit`     | `number` | No       | Page size. Must be a positive integer. Requires `page`. |
+
+No body.
+
+**Examples**
+
+```
+GET /movements?startDate=2025-06-01T00:00:00.000Z&endDate=2025-06-30T23:59:59.999Z
+GET /movements?page=2&limit=20
+GET /movements?startDate=2025-06-01T00:00:00.000Z&endDate=2025-06-30T23:59:59.999Z&page=1&limit=10
+```
 
 **Response `200 OK`**
 
@@ -82,13 +99,24 @@ No query params. No body.
 ]
 ```
 
-> ~300 seeded entries on first load (12 months × ~25/month). No pagination, filtering, or sorting params. Order reflects insertion order (seeded data is date-ascending; new entries appended).
+> ~300 seeded entries on first load (12 months × ~25/month). Order reflects insertion order (seeded data is date-ascending; new entries appended). Date filters are inclusive. Pagination is only applied when both `page` and `limit` are provided; otherwise the endpoint returns every matching movement.
+
+**Errors**
+
+| Status | Body | Condition |
+|--------|------|-----------|
+| `400` | `{ "error": "startDate must be a valid ISO 8601 date" }` | Invalid `startDate` |
+| `400` | `{ "error": "endDate must be a valid ISO 8601 date" }` | Invalid `endDate` |
+| `400` | `{ "error": "startDate must be before or equal to endDate" }` | `startDate` is after `endDate` |
+| `400` | `{ "error": "page must be a positive integer" }` | Invalid `page` |
+| `400` | `{ "error": "limit must be a positive integer" }` | Invalid `limit` |
+| `400` | `{ "error": "page and limit must be provided together" }` | Only one pagination param was provided |
 
 ---
 
 ## GET /income
 
-Returns only movements where `type === "income"`.
+Returns only movements where `type === "income"`, with the same optional date filtering and pagination query params as `/movements`.
 
 **Request**
 
@@ -96,7 +124,23 @@ Returns only movements where `type === "income"`.
 GET /income
 ```
 
-No query params. No body.
+**Query params**
+
+| Param       | Type     | Required | Description |
+|-------------|----------|----------|-------------|
+| `startDate` | `string` | No       | Inclusive lower bound for `date`. Must be a valid ISO 8601 date. |
+| `endDate`   | `string` | No       | Inclusive upper bound for `date`. Must be a valid ISO 8601 date. |
+| `page`      | `number` | No       | 1-based page number. Must be a positive integer. Requires `limit`. |
+| `limit`     | `number` | No       | Page size. Must be a positive integer. Requires `page`. |
+
+No body.
+
+**Examples**
+
+```
+GET /income?startDate=2025-06-01T00:00:00.000Z&endDate=2025-06-30T23:59:59.999Z
+GET /income?page=1&limit=10
+```
 
 **Response `200 OK`**
 
@@ -107,13 +151,24 @@ No query params. No body.
 ]
 ```
 
-> Server-side filter: `movements.filter(m => m.type === 'income')`. No error cases.
+> Server-side filter: `movements.filter(m => m.type === 'income')`, then optional date filtering, then optional pagination. Date filters are inclusive. Pagination is only applied when both `page` and `limit` are provided.
+
+**Errors**
+
+| Status | Body | Condition |
+|--------|------|-----------|
+| `400` | `{ "error": "startDate must be a valid ISO 8601 date" }` | Invalid `startDate` |
+| `400` | `{ "error": "endDate must be a valid ISO 8601 date" }` | Invalid `endDate` |
+| `400` | `{ "error": "startDate must be before or equal to endDate" }` | `startDate` is after `endDate` |
+| `400` | `{ "error": "page must be a positive integer" }` | Invalid `page` |
+| `400` | `{ "error": "limit must be a positive integer" }` | Invalid `limit` |
+| `400` | `{ "error": "page and limit must be provided together" }` | Only one pagination param was provided |
 
 ---
 
 ## GET /outcome
 
-Returns only movements where `type === "outcome"`.
+Returns only movements where `type === "outcome"`, with the same optional date filtering and pagination query params as `/movements`.
 
 **Request**
 
@@ -121,7 +176,23 @@ Returns only movements where `type === "outcome"`.
 GET /outcome
 ```
 
-No query params. No body.
+**Query params**
+
+| Param       | Type     | Required | Description |
+|-------------|----------|----------|-------------|
+| `startDate` | `string` | No       | Inclusive lower bound for `date`. Must be a valid ISO 8601 date. |
+| `endDate`   | `string` | No       | Inclusive upper bound for `date`. Must be a valid ISO 8601 date. |
+| `page`      | `number` | No       | 1-based page number. Must be a positive integer. Requires `limit`. |
+| `limit`     | `number` | No       | Page size. Must be a positive integer. Requires `page`. |
+
+No body.
+
+**Examples**
+
+```
+GET /outcome?startDate=2025-06-01T00:00:00.000Z&endDate=2025-06-30T23:59:59.999Z
+GET /outcome?page=3&limit=15
+```
 
 **Response `200 OK`**
 
@@ -132,7 +203,18 @@ No query params. No body.
 ]
 ```
 
-> Server-side filter: `movements.filter(m => m.type === 'outcome')`. No error cases.
+> Server-side filter: `movements.filter(m => m.type === 'outcome')`, then optional date filtering, then optional pagination. Date filters are inclusive. Pagination is only applied when both `page` and `limit` are provided.
+
+**Errors**
+
+| Status | Body | Condition |
+|--------|------|-----------|
+| `400` | `{ "error": "startDate must be a valid ISO 8601 date" }` | Invalid `startDate` |
+| `400` | `{ "error": "endDate must be a valid ISO 8601 date" }` | Invalid `endDate` |
+| `400` | `{ "error": "startDate must be before or equal to endDate" }` | `startDate` is after `endDate` |
+| `400` | `{ "error": "page must be a positive integer" }` | Invalid `page` |
+| `400` | `{ "error": "limit must be a positive integer" }` | Invalid `limit` |
+| `400` | `{ "error": "page and limit must be provided together" }` | Only one pagination param was provided |
 
 ---
 

@@ -1,15 +1,19 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { useMovementSearch } from '@/composables/useMovementSearch'
 import { useUser } from '@/composables/useUser'
 import { useMovements } from '@/composables/useMovements'
 import MovementList from '@/components/movements/MovementList.vue'
 import MovementForm from '@/components/movements/MovementForm.vue'
 import SuccessCarousel from '@/components/SuccessCarousel.vue'
 import { formatCurrency } from '@/utils/format.util'
+import { getMovementQueryParams } from '@/utils/movement-query.util'
 import type { MovementPayload } from '@/types'
 
 const { user, fetchUser } = useUser()
 const { movements, isLoading, error, fetchMovements, addMovement, removeMovement } = useMovements()
+const route = useRoute()
 
 const showForm = ref(false)
 const formLoading = ref(false)
@@ -19,9 +23,7 @@ const deleteError = ref<string | null>(null)
 
 const currency = computed(() => user.value?.currency ?? 'USD')
 
-const sortedMovements = computed(() =>
-  [...movements.value].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-)
+const { searchInput, filteredMovements, visibleMovementCount, emptyStateMessage, handleSearchInput } = useMovementSearch(movements, currency)
 
 const totalIncome = computed(() =>
   movements.value.filter((m) => m.type === 'income').reduce((sum, m) => sum + m.amount, 0),
@@ -31,9 +33,12 @@ const totalExpenses = computed(() =>
   movements.value.filter((m) => m.type === 'outcome').reduce((sum, m) => sum + m.amount, 0),
 )
 
-onMounted(async () => {
-  await Promise.all([fetchUser(), fetchMovements()])
-})
+async function loadData() {
+  await Promise.all([fetchUser(), fetchMovements(getMovementQueryParams(route.query))])
+}
+
+onMounted(loadData)
+watch(() => [route.query.page, route.query.limit], loadData)
 
 function handleOpenForm() {
   formError.value = null
@@ -45,7 +50,7 @@ async function handleAddMovement(payload: MovementPayload) {
   formError.value = null
   try {
     await addMovement(payload)
-    await fetchUser()
+    await loadData()
     showForm.value = false
   } catch (e) {
     formError.value = e instanceof Error ? e.message : 'Failed to add movement'
@@ -59,7 +64,7 @@ async function handleDelete(id: number) {
   deleteError.value = null
   try {
     await removeMovement(id)
-    await fetchUser()
+    await loadData()
   } catch {
     deleteError.value = 'Failed to delete movement. Please try again.'
   } finally {
@@ -163,15 +168,27 @@ async function handleDelete(id: number) {
 
     <div class="card bg-base-100 shadow-sm">
       <div class="card-body p-0">
-        <div class="flex items-center justify-between px-5 pt-5 pb-3">
-          <h2 class="font-semibold">All Movements</h2>
-          <span class="text-base-content/40 text-sm tabular-nums">{{ movements.length }} entries</span>
+        <div class="flex flex-col gap-4 px-5 pt-5 pb-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 class="font-semibold">All Movements</h2>
+            <p class="text-sm text-base-content/40 mt-0.5">Search by description, amount, date, or movement type.</p>
+          </div>
+          <div class="flex flex-col gap-2 w-full md:max-w-sm">
+            <label class="input input-bordered flex items-center gap-2 w-full">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input :value="searchInput" type="search" class="grow" placeholder="Search all movements" @input="handleSearchInput" />
+            </label>
+            <span class="text-right text-base-content/40 text-sm tabular-nums">{{ visibleMovementCount }} results</span>
+          </div>
         </div>
         <MovementList
-          :movements="sortedMovements"
+          :movements="filteredMovements"
           :currency="currency"
           :is-loading="isLoading"
           :deleting-id="deletingId"
+          :empty-message="emptyStateMessage"
           @delete="handleDelete"
         />
       </div>

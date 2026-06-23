@@ -16,7 +16,7 @@ interface Story {
   progressColor: string
 }
 
-const stories: Story[] = [
+const baseStories: Story[] = [
   {
     id: 1,
     quote: "I never realized how much I was spending on forgotten subscriptions until FinanceLab showed me the full picture. Cutting six of them freed up $240 every month — money I now put into savings.",
@@ -75,26 +75,54 @@ const stories: Story[] = [
   },
 ]
 
+function shuffleStories(source: Story[]): Story[] {
+  const shuffled = [...source]
+
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const randomIndex = Math.floor(Math.random() * (i + 1))
+    const temp = shuffled[i]
+    shuffled[i] = shuffled[randomIndex]!
+    shuffled[randomIndex] = temp!
+  }
+
+  return shuffled
+}
+
+const INTERVAL_MS = 8000
+const stories = ref<Story[]>([...baseStories])
 const currentIndex = ref(0)
-const currentStory = computed<Story>(() => stories[currentIndex.value]!)
+const currentStory = computed<Story>(() => stories.value[currentIndex.value]!)
+const expandedStoryId = ref<number | null>(null)
+
+const currentPreviewQuote = computed(() => {
+  const quote = currentStory.value.quote.trim()
+  const previewLength = 120
+
+  if (quote.length <= previewLength) {
+    return quote
+  }
+
+  return `${quote.slice(0, previewLength).trimEnd()}...`
+})
+
+const isCurrentStoryExpanded = computed(() => expandedStoryId.value === currentStory.value.id)
 
 const isPaused = ref(false)
 let timer: ReturnType<typeof setInterval> | null = null
 
 function startTimer() {
-  timer = setInterval(() => goTo(currentIndex.value + 1), 8000)
+  timer = setInterval(() => goTo(currentIndex.value + 1), INTERVAL_MS)
 }
 
 function goTo(index: number) {
-  const next = ((index % stories.length) + stories.length) % stories.length
+  if (!stories.value.length) return
+  const next = ((index % stories.value.length) + stories.value.length) % stories.value.length
   if (next === currentIndex.value) return
   if (timer) { clearInterval(timer); timer = null }
   currentIndex.value = next
+  expandedStoryId.value = null
   if (!isPaused.value) startTimer()
 }
-
-function handleNext() { goTo(currentIndex.value + 1) }
-function handlePrev() { goTo(currentIndex.value - 1) }
 
 function pauseTimer() {
   isPaused.value = true
@@ -106,7 +134,15 @@ function resumeTimer() {
   startTimer()
 }
 
-onMounted(startTimer)
+function toggleStoryExpansion() {
+  expandedStoryId.value = isCurrentStoryExpanded.value ? null : currentStory.value.id
+}
+
+onMounted(() => {
+  stories.value = shuffleStories(baseStories)
+  currentIndex.value = 0
+  startTimer()
+})
 onUnmounted(pauseTimer)
 </script>
 
@@ -116,7 +152,7 @@ onUnmounted(pauseTimer)
     @mouseenter="pauseTimer"
     @mouseleave="resumeTimer"
   >
-    <div class="flex items-center justify-between px-6 pt-5 pb-4">
+    <div class="flex items-center justify-between px-5 pt-4 pb-3">
       <div class="flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-warning" viewBox="0 0 20 20" fill="currentColor">
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -150,50 +186,52 @@ onUnmounted(pauseTimer)
     </div>
 
     <Transition name="story" mode="out-in">
-      <div :key="currentStory.id" class="px-6 pb-5 min-h-40">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-          <div class="md:col-span-2 flex flex-col gap-5">
-            <div class="relative pl-6">
+      <div :key="currentStory.id" class="px-5 pb-4 min-h-32">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+          <div class="md:col-span-2 flex flex-col gap-4">
+            <div class="relative pl-5">
               <svg
-                class="absolute top-0 left-0 h-5 w-5 opacity-15"
+                class="absolute top-0 left-0 h-4 w-4 opacity-15"
                 :class="currentStory.achievementText"
                 fill="currentColor"
                 viewBox="0 0 32 32"
               >
                 <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
               </svg>
-              <p class="text-base-content/75 text-base leading-relaxed">
-                {{ currentStory.quote }}
+              <p class="text-sm text-base-content/75 leading-relaxed md:text-[0.95rem]">
+                {{ isCurrentStoryExpanded ? currentStory.quote : currentPreviewQuote }}
               </p>
+              <button
+                v-if="currentPreviewQuote !== currentStory.quote"
+                type="button"
+                class="mt-1 text-xs font-semibold text-base-content/50 transition-colors hover:text-base-content"
+                @click="toggleStoryExpansion"
+              >
+                {{ isCurrentStoryExpanded ? 'Show less' : 'Read more' }}
+              </button>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2.5">
               <div class="avatar avatar-placeholder shrink-0">
-                <div class="w-10 rounded-full" :class="[currentStory.avatarBg, currentStory.avatarContent]">
-                  <span class="text-sm font-bold">{{ currentStory.initials }}</span>
+                <div class="w-9 rounded-full" :class="[currentStory.avatarBg, currentStory.avatarContent]">
+                  <span class="text-xs font-bold">{{ currentStory.initials }}</span>
                 </div>
               </div>
               <div class="flex-1 min-w-0">
                 <p class="font-semibold text-sm leading-tight">{{ currentStory.name }}</p>
                 <p class="text-xs text-base-content/45 leading-tight mt-0.5">{{ currentStory.role }}</p>
               </div>
-              <span class="badge badge-success badge-sm gap-1 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                </svg>
-                Verified
-              </span>
             </div>
           </div>
 
           <div class="flex items-stretch">
             <div
-              class="w-full rounded-2xl p-5 flex flex-col items-center justify-center text-center gap-1"
+              class="w-full rounded-2xl p-4 flex flex-col items-center justify-center text-center gap-1"
               :class="currentStory.achievementBg"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 mb-1"
+                class="h-4 w-4 mb-1"
                 :class="currentStory.achievementText"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -201,7 +239,7 @@ onUnmounted(pauseTimer)
               >
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
-              <p class="text-4xl font-bold leading-none tabular-nums" :class="currentStory.achievementText">
+              <p class="text-3xl font-bold leading-none tabular-nums" :class="currentStory.achievementText">
                 {{ currentStory.highlight }}
               </p>
               <p class="text-xs font-semibold uppercase tracking-wider mt-1" :class="currentStory.achievementText">
@@ -213,29 +251,6 @@ onUnmounted(pauseTimer)
       </div>
     </Transition>
 
-    <div class="flex items-center justify-between px-6 py-3 border-t border-base-200">
-      <button
-        class="btn btn-ghost btn-xs gap-1 text-base-content/40 hover:text-base-content"
-        @click="handlePrev"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-        Prev
-      </button>
-      <span class="text-xs text-base-content/30 tabular-nums">
-        {{ currentIndex + 1 }} / {{ stories.length }}
-      </span>
-      <button
-        class="btn btn-ghost btn-xs gap-1 text-base-content/40 hover:text-base-content"
-        @click="handleNext"
-      >
-        Next
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
-    </div>
   </div>
 </template>
 

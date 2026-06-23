@@ -1,7 +1,7 @@
 export const user = {
   id: 1,
-  name: 'John Doe',
-  email: 'john@example.com',
+  name: 'Mau Mat',
+  email: 'mm@mm.com',
   currency: 'USD',
 }
 

@@ -2,6 +2,26 @@ import type { Movement, MovementPayload, User } from '@/types'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
 
+export interface MovementQueryParams {
+  page?: number
+  limit?: number
+}
+
+function buildMovementUrl(path: string, params?: MovementQueryParams): string {
+  const searchParams = new URLSearchParams()
+
+  if (params?.page != null) {
+    searchParams.set('page', params.page.toString())
+  }
+
+  if (params?.limit != null) {
+    searchParams.set('limit', params.limit.toString())
+  }
+
+  const query = searchParams.toString()
+  return `${BASE_URL}${path}${query ? `?${query}` : ''}`
+}
+
 export const apiService = {
   async getUser(): Promise<User> {
     const response = await fetch(`${BASE_URL}/me`)
@@ -9,20 +29,20 @@ export const apiService = {
     return response.json()
   },
 
-  async getMovements(): Promise<Movement[]> {
-    const response = await fetch(`${BASE_URL}/movements`)
+  async getMovements(params?: MovementQueryParams): Promise<Movement[]> {
+    const response = await fetch(buildMovementUrl('/movements', params))
     if (!response.ok) throw new Error('Failed to fetch movements')
     return response.json()
   },
 
-  async getIncome(): Promise<Movement[]> {
-    const response = await fetch(`${BASE_URL}/income`)
+  async getIncome(params?: MovementQueryParams): Promise<Movement[]> {
+    const response = await fetch(buildMovementUrl('/income', params))
     if (!response.ok) throw new Error('Failed to fetch income')
     return response.json()
   },
 
-  async getOutcome(): Promise<Movement[]> {
-    const response = await fetch(`${BASE_URL}/outcome`)
+  async getOutcome(params?: MovementQueryParams): Promise<Movement[]> {
+    const response = await fetch(buildMovementUrl('/outcome', params))
     if (!response.ok) throw new Error('Failed to fetch expenses')
     return response.json()
   },

@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import db from './db.js'
+import { queryMovements } from './movement-query.js'
 
 const app = express()
 app.use(express.json())
@@ -15,15 +16,30 @@ app.get('/me', (req, res) => {
 })
 
 app.get('/movements', (req, res) => {
-  res.json(db.getMovements())
+  const result = queryMovements(db.getMovements(), req.query)
+  if (result.error) {
+    return res.status(400).json({ error: result.error })
+  }
+
+  res.json(result.data)
 })
 
 app.get('/income', (req, res) => {
-  res.json(db.getMovements().filter((m) => m.type === 'income'))
+  const result = queryMovements(db.getMovements(), req.query, 'income')
+  if (result.error) {
+    return res.status(400).json({ error: result.error })
+  }
+
+  res.json(result.data)
 })
 
 app.get('/outcome', (req, res) => {
-  res.json(db.getMovements().filter((m) => m.type === 'outcome'))
+  const result = queryMovements(db.getMovements(), req.query, 'outcome')
+  if (result.error) {
+    return res.status(400).json({ error: result.error })
+  }
+
+  res.json(result.data)
 })
 
 app.post('/movements', (req, res) => {

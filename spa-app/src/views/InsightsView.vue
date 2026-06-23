@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useUser } from '@/composables/useUser'
 import { useMovements } from '@/composables/useMovements'
 import { formatCurrency } from '@/utils/format.util'
+import SuccessCarousel from '@/components/SuccessCarousel.vue'
 import InsightsChart from '@/components/insights/InsightsChart.vue'
 import {
   buildInsightSeries,
@@ -56,6 +57,8 @@ onMounted(async () => {
 
 <template>
   <div class="flex flex-col gap-6">
+    <SuccessCarousel />
+
     <div class="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
       <div>
         <h1 class="text-2xl font-bold tracking-tight">Insights</h1>

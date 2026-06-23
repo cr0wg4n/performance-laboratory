@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { apiService } from '@/services/api.service'
+import { apiService, type MovementQueryParams } from '@/services/api.service'
 import type { Movement, MovementPayload } from '@/types'
 
 export function useMovements() {
@@ -19,16 +19,16 @@ export function useMovements() {
     }
   }
 
-  function fetchMovements() {
-    return runFetch(() => apiService.getMovements(), 'Failed to load movements')
+  function fetchMovements(params?: MovementQueryParams) {
+    return runFetch(() => apiService.getMovements(params), 'Failed to load movements')
   }
 
-  function fetchIncome() {
-    return runFetch(() => apiService.getIncome(), 'Failed to load income')
+  function fetchIncome(params?: MovementQueryParams) {
+    return runFetch(() => apiService.getIncome(params), 'Failed to load income')
   }
 
-  function fetchOutcome() {
-    return runFetch(() => apiService.getOutcome(), 'Failed to load expenses')
+  function fetchOutcome(params?: MovementQueryParams) {
+    return runFetch(() => apiService.getOutcome(params), 'Failed to load expenses')
   }
 
   async function addMovement(payload: MovementPayload): Promise<Movement> {
