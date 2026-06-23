@@ -56,10 +56,10 @@ const jitter = (base) => Math.round(base * (0.85 + rand() * 0.3))
 const movements = []
 let id = 1
 
-// 12 months of data, ~25 entries/month
-for (let month = 0; month < 12; month++) {
-  const year = 2025 + Math.floor((month + 6) / 12)
-  const m = ((month + 6) % 12) + 1
+// ~1000 months of data, ~300 entries/month → ~300,000 entries total
+for (let month = 0; month < 1000; month++) {
+  const year = 2000 + Math.floor(month / 12)
+  const m = (month % 12) + 1
 
   // 1 salary per month
   movements.push({

@@ -38,6 +38,17 @@ defineProps<Props>()
         Dashboard
       </RouterLink>
 
+      <RouterLink
+        to="/insights"
+        active-class="bg-accent/20 text-accent"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-neutral-content/70 hover:bg-neutral-content/10 hover:text-neutral-content transition-colors"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19V5m0 14h16M8 15l3-3 3 2 5-6" />
+        </svg>
+        Insights
+      </RouterLink>
+
       <p class="text-xs font-semibold text-neutral-content/40 uppercase tracking-wider px-3 mt-4 mb-2">Movements</p>
 
       <RouterLink

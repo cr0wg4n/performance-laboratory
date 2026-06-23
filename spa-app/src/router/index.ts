@@ -21,6 +21,11 @@ const router = createRouter({
       component: () => import('@/views/MovementsView.vue'),
       props: { type: 'outcome' as const },
     },
+    {
+      path: '/insights',
+      name: 'insights',
+      component: () => import('@/views/InsightsView.vue'),
+    },
   ],
 })
 

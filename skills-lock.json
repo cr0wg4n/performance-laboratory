@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "ts-builder": {
+      "source": "cr0wg4n/dev-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ts-builder/SKILL.md",
+      "computedHash": "3b7496fb2f1a8a8dc29fd0310717b9a591193c9244fdf677c03d1f2ce31a302e"
+    },
+    "ts-code-review": {
+      "source": "cr0wg4n/dev-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ts-code-review/SKILL.md",
+      "computedHash": "942b4c1ea9e47a4703bc900b834395f6b327680ea47b9ff1d79cc857ce56bdd3"
+    },
+    "vue-builder": {
+      "source": "cr0wg4n/dev-skills",
+      "sourceType": "github",
+      "skillPath": "skills/vue-builder/SKILL.md",
+      "computedHash": "9f2f127c940f6cba61e3ae5975f0f7ea8fd6b07cfcec0e42ea869372ac10ff1a"
+    },
+    "vue-code-review": {
+      "source": "cr0wg4n/dev-skills",
+      "sourceType": "github",
+      "skillPath": "skills/vue-code-review/SKILL.md",
+      "computedHash": "a95638e3092968a95b1269bd67c4c56b24a88b1b30c231c4736d874fc0c6837f"
+    }
+  }
+}
