@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref } from 'vue'
 import { useUser } from '@/composables/useUser'
-import { useMovements } from '@/composables/useMovements'
+import { useMovementsStore } from '@/composables/useMovements'
 import { formatCurrency } from '@/utils/format.util'
 import SuccessCarousel from '@/components/SuccessCarousel.vue'
 import InsightsChart from '@/components/insights/InsightsChart.vue'
@@ -16,7 +17,9 @@ import {
 } from '@/utils/insights.util'
 
 const { user, fetchUser } = useUser()
-const { movements, isLoading, error, fetchMovements } = useMovements()
+const movementsStore = useMovementsStore()
+const { movements, isLoading, error } = storeToRefs(movementsStore)
+const { fetchMovements } = movementsStore
 
 const dateRange = ref<DateRange>(createDefaultDateRange())
 

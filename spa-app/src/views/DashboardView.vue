@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMovementSearch } from '@/composables/useMovementSearch'
 import { useUser } from '@/composables/useUser'
-import { useMovements } from '@/composables/useMovements'
+import { useMovementsStore } from '@/composables/useMovements'
 import MovementList from '@/components/movements/MovementList.vue'
 import MovementForm from '@/components/movements/MovementForm.vue'
 import SuccessCarousel from '@/components/SuccessCarousel.vue'
@@ -12,7 +13,9 @@ import { getMovementQueryParams } from '@/utils/movement-query.util'
 import type { MovementPayload } from '@/types'
 
 const { user, fetchUser } = useUser()
-const { movements, isLoading, error, fetchMovements, addMovement, removeMovement } = useMovements()
+const movementsStore = useMovementsStore()
+const { movements, isLoading, error } = storeToRefs(movementsStore)
+const { fetchMovements, addMovement, removeMovement } = movementsStore
 const route = useRoute()
 
 const showForm = ref(false)

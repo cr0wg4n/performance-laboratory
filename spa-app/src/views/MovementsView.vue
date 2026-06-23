@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMovementSearch } from '@/composables/useMovementSearch'
 import { useUser } from '@/composables/useUser'
-import { useMovements } from '@/composables/useMovements'
+import { useMovementsStore } from '@/composables/useMovements'
 import SuccessCarousel from '@/components/SuccessCarousel.vue'
 import MovementList from '@/components/movements/MovementList.vue'
 import { formatCurrency } from '@/utils/format.util'
@@ -16,7 +17,9 @@ interface Props {
 const props = defineProps<Props>()
 
 const { user, fetchUser } = useUser()
-const { movements, isLoading, error, fetchIncome, fetchOutcome, removeMovement } = useMovements()
+const movementsStore = useMovementsStore()
+const { movements, isLoading, error } = storeToRefs(movementsStore)
+const { fetchIncome, fetchOutcome, removeMovement } = movementsStore
 const route = useRoute()
 
 const deletingId = ref<number | null>(null)
