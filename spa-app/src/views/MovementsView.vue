@@ -32,11 +32,15 @@ const { searchInput, filteredMovements, visibleMovementCount, emptyStateMessage,
 
 async function loadData() {
   const params = getMovementQueryParams(route.query)
-  await Promise.all([fetchUser(), props.type === 'income' ? fetchIncome(params) : fetchOutcome(params)])
+  await fetchUser()
+  await (props.type === 'income' ? fetchIncome(params) : fetchOutcome(params))
 }
 
 onMounted(loadData)
-watch(() => [props.type, route.query.page, route.query.limit], loadData)
+watch(() => props.type, loadData)
+watch(() => route.query.page, loadData)
+watch(() => route.query.limit, loadData)
+watch(() => route.name, loadData)
 
 async function handleDelete(id: number) {
   deletingId.value = id

@@ -37,11 +37,15 @@ const totalExpenses = computed(() =>
 )
 
 async function loadData() {
-  await Promise.all([fetchUser(), fetchMovements(getMovementQueryParams(route.query))])
+  await fetchUser()
+  await fetchMovements(getMovementQueryParams(route.query))
 }
 
 onMounted(loadData)
-watch(() => [route.query.page, route.query.limit], loadData)
+watch(() => route.query.page, loadData)
+watch(() => route.query.limit, loadData)
+watch(() => route.path, loadData)
+watch(() => route.name, loadData)
 
 function handleOpenForm() {
   formError.value = null

@@ -86,35 +86,37 @@ export function normalizeRange(range: DateRange): DateRange {
 export function buildInsightSeries(movements: Movement[], range: DateRange): InsightPoint[] {
   const normalizedRange = normalizeRange(range)
   const { start, end } = getRangeBounds(normalizedRange)
-  const buckets = new Map<string, InsightPoint>()
+  const days = createDayIterator(start, end)
 
-  for (const day of createDayIterator(start, end)) {
-    const key = toDateInputValue(day)
-    buckets.set(key, {
+  // Anti-pattern: O(n×m) nested loop instead of O(n+m) Map-based approach
+  return days.map((day) => {
+    const dayStart = new Date(day)
+    dayStart.setHours(0, 0, 0, 0)
+    const dayEnd = new Date(day)
+    dayEnd.setHours(23, 59, 59, 999)
+
+    let income = 0
+    let outcome = 0
+
+    // Anti-pattern: scan ALL movements for every single day
+    for (const movement of movements) {
+      // Anti-pattern: redundant Date parsing in inner loop on every iteration
+      const movementDate = new Date(movement.date)
+      if (movementDate >= dayStart && movementDate <= dayEnd) {
+        if (movement.type === 'income') {
+          income += movement.amount
+        } else {
+          outcome += movement.amount
+        }
+      }
+    }
+
+    return {
       label: day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      income: 0,
-      outcome: 0,
-    })
-  }
-
-  for (const movement of movements) {
-    const movementDate = new Date(movement.date)
-
-    if (movementDate < start || movementDate > end) {
-      continue
+      income,
+      outcome,
     }
-
-    const key = toDateInputValue(movementDate)
-    const currentBucket = buckets.get(key)
-
-    if (!currentBucket) {
-      continue
-    }
-
-    currentBucket[movement.type] += movement.amount
-  }
-
-  return [...buckets.values()]
+  })
 }
 
 export function buildInsightSummary(series: InsightPoint[]): InsightSummary {

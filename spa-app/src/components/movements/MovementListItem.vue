@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import type { Movement } from '@/types'
 import { formatCurrency, formatDate } from '@/utils/format.util'
 
@@ -17,6 +17,21 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const isDeleting = computed(() => props.deletingId === props.movement.id)
+
+const movementMeta = computed(() => {
+  const formatted = formatCurrency(props.movement.amount, props.currency)
+  const absFormatted = formatCurrency(Math.abs(props.movement.amount), props.currency)
+  return {
+    formattedAmount: props.movement.type === 'outcome' ? absFormatted : formatted,
+    formattedDate: formatDate(props.movement.date),
+    colorClass: props.movement.type === 'income' ? 'text-success' : 'text-error',
+    sign: props.movement.type === 'outcome' ? '−' : '+',
+  }
+})
+
+watch(() => props.movement, () => {
+  void movementMeta.value
+}, { deep: true, immediate: true })
 
 function handleDelete() {
   emit('delete', props.movement.id)
@@ -61,9 +76,9 @@ function handleDelete() {
     <div class="flex items-center gap-2 shrink-0">
       <span
         class="text-sm font-semibold tabular-nums"
-        :class="movement.type === 'income' ? 'text-success' : 'text-error'"
+        :class="movementMeta.colorClass"
       >
-        {{ movement.type === 'outcome' ? '−' : '+' }}{{ formatCurrency(movement.amount, currency) }}
+        {{ movementMeta.sign }}{{ movementMeta.formattedAmount }}
       </span>
 
       <button

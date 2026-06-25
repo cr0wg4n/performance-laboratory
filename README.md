@@ -1,12 +1,12 @@
 
+- http://localhost:5173/?page=1&limit=10
+- http://localhost:5173/income?page=2&limit=20
+- http://localhost:5173/outcome?page=3&limit=5
+- http://localhost:5173/?limit=100000&page=1
 
-http://localhost:5173/?page=1&limit=10
-http://localhost:5173/income?page=2&limit=20
-http://localhost:5173/outcome?page=3&limit=5
 
 
-
-## The Bad Performance Skills
+## Poor Web Performance Skill
 
 1. Don't remove event listeners when they are no longer needed, in component should not be destroyed, or when the component is unmounted. We want to introduce memory leaks and performance issues.
 2. Use large data sets and complex computations in the main thread, blocking the UI and causing jank.
@@ -18,7 +18,7 @@ http://localhost:5173/outcome?page=3&limit=5
 8. Avoid using virtualization or pagination for large lists, rendering all items at once and causing performance issues.
 9. Use excessive watchers or computed properties that trigger unnecessary re-renders, leading to performance degradation.
 10. Avoid using performance optimization techniques like debouncing or throttling for user input events, causing excessive function calls and performance issues.
-11. Avoid using clear :key attributes in v-for loops, leading to inefficient DOM updates and re-renders.
+11. Avoid using clear and unique values for `key` attributes in template loops (independent of the web framework), leading to inefficient DOM updates and re-renders.
 12. Use large images or media files without optimization, causing slow loading times and increased bandwidth usage.
 13. Import as much components and code as possible in a single file, leading to larger bundle sizes and slower load times.
 14. Bundle all in one file, avoiding code splitting and lazy loading.

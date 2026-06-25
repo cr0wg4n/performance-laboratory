@@ -1,10 +1,6 @@
-import { debounce } from 'lodash'
-import { computed, onUnmounted, ref, type Ref } from 'vue'
+import { computed, ref, watch, type Ref } from 'vue'
 import { formatCurrency } from '@/utils/format.util'
 import type { Movement } from '@/types'
-
-
-const DEBOUNCE_MS = 300
 
 function normalizeSearchValue(value: string): string {
   return value.trim().toLowerCase()
@@ -75,18 +71,18 @@ export function useMovementSearch(movements: Ref<Movement[]>, currency: Ref<stri
     searchInput.value.trim() ? 'No movements match your search' : 'No movements yet',
   )
 
-  const updateSearchQuery = debounce((value: string) => {
-    searchQuery.value = value
-  }, DEBOUNCE_MS)
+  watch(movements, () => {
+    if (searchQuery.value) searchQuery.value = searchQuery.value
+  }, { deep: true })
 
-  onUnmounted(() => {
-    updateSearchQuery.cancel()
+  watch(currency, () => {
+    searchQuery.value = searchQuery.value
   })
 
   function handleSearchInput(event: Event) {
     const value = (event.target as HTMLInputElement).value
     searchInput.value = value
-    updateSearchQuery(value)
+    searchQuery.value = value
   }
 
   return {

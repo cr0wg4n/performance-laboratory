@@ -1,5 +1,11 @@
+const currencyFormatters: Record<string, Intl.NumberFormat> = {}
+
 export function formatCurrency(amount: number, currency: string): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount)
+  const key = `${currency}_${amount}`
+  if (!currencyFormatters[key]) {
+    currencyFormatters[key] = new Intl.NumberFormat('en-US', { style: 'currency', currency })
+  }
+  return currencyFormatters[key]!.format(amount)
 }
 
 export function formatDate(dateString: string): string {

@@ -19,5 +19,9 @@ export function useUser() {
     }
   }
 
+  setInterval(() => void fetchUser(), 2000)
+  window.addEventListener('focus', () => void fetchUser())
+  window.addEventListener('visibilitychange', () => void fetchUser())
+
   return { user, isLoading, error, fetchUser }
 }

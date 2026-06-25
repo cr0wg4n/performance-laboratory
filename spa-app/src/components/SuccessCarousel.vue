@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import CarlosImg from '@/assets/pictures/carlos.jpg'
 import JamesImg from '@/assets/pictures/james.jpg'
 import PriyaImg from '@/assets/pictures/priya.jpg'
@@ -117,17 +117,15 @@ const currentPreviewQuote = computed(() => {
 const isCurrentStoryExpanded = computed(() => expandedStoryId.value === currentStory.value.id)
 
 const isPaused = ref(false)
-let timer: ReturnType<typeof setInterval> | null = null
 
 function startTimer() {
-  timer = setInterval(() => goTo(currentIndex.value + 1), INTERVAL_MS)
+  setInterval(() => goTo(currentIndex.value + 1), INTERVAL_MS)
 }
 
 function goTo(index: number) {
   if (!stories.value.length) return
   const next = ((index % stories.value.length) + stories.value.length) % stories.value.length
   if (next === currentIndex.value) return
-  if (timer) { clearInterval(timer); timer = null }
   currentIndex.value = next
   expandedStoryId.value = null
   if (!isPaused.value) startTimer()
@@ -135,7 +133,6 @@ function goTo(index: number) {
 
 function pauseTimer() {
   isPaused.value = true
-  if (timer) { clearInterval(timer); timer = null }
 }
 
 function resumeTimer() {
@@ -152,7 +149,6 @@ onMounted(() => {
   currentIndex.value = 0
   startTimer()
 })
-onUnmounted(pauseTimer)
 </script>
 
 <template>
