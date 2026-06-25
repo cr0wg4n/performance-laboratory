@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import CarlosImg from '@/assets/pictures/carlos.jpg'
+import JamesImg from '@/assets/pictures/james.jpg'
+import PriyaImg from '@/assets/pictures/priya.jpg'
+import SarahImg from '@/assets/pictures/sarah.jpg'
 
 interface Story {
   id: number
@@ -14,6 +18,7 @@ interface Story {
   achievementBg: string
   achievementText: string
   progressColor: string
+  image: string
 }
 
 const baseStories: Story[] = [
@@ -30,6 +35,7 @@ const baseStories: Story[] = [
     achievementBg: "bg-success/10",
     achievementText: "text-success",
     progressColor: "bg-success",
+    image: SarahImg,
   },
   {
     id: 2,
@@ -44,6 +50,7 @@ const baseStories: Story[] = [
     achievementBg: "bg-primary/10",
     achievementText: "text-primary",
     progressColor: "bg-primary",
+    image: JamesImg,
   },
   {
     id: 3,
@@ -58,6 +65,7 @@ const baseStories: Story[] = [
     achievementBg: "bg-secondary/10",
     achievementText: "text-secondary",
     progressColor: "bg-secondary",
+    image: PriyaImg,
   },
   {
     id: 4,
@@ -72,6 +80,7 @@ const baseStories: Story[] = [
     achievementBg: "bg-accent/10",
     achievementText: "text-accent",
     progressColor: "bg-accent",
+    image: CarlosImg,
   },
 ]
 
@@ -214,7 +223,7 @@ onUnmounted(pauseTimer)
             <div class="flex items-center gap-2.5">
               <div class="avatar avatar-placeholder shrink-0">
                 <div class="w-9 rounded-full" :class="[currentStory.avatarBg, currentStory.avatarContent]">
-                  <span class="text-xs font-bold">{{ currentStory.initials }}</span>
+                  <img :src="currentStory.image" alt="">
                 </div>
               </div>
               <div class="flex-1 min-w-0">

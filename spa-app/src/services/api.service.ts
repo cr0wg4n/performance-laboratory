@@ -1,6 +1,7 @@
 import type { Movement, MovementPayload, User } from '@/types'
+import { config } from '@/config'
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
+const BASE_URL = config.apiHost
 
 export interface MovementQueryParams {
   page?: number

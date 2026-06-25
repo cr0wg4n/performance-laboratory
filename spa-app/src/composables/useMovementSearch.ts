@@ -17,10 +17,37 @@ function matchesSearchQuery(searchableValue: string, query: string): boolean {
 export function useMovementSearch(movements: Ref<Movement[]>, currency: Ref<string>) {
   const searchInput = ref('')
   const searchQuery = ref('')
+  const sortOrder = ref<'asc' | 'desc'>('desc')
+  const sortField = ref<'date' | 'description'>('date')
 
   const sortedMovements = computed(() =>
-    [...movements.value].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+    [...movements.value].sort((a, b) => {
+      if (sortField.value === 'description') {
+        const cmp = a.description.localeCompare(b.description)
+        return sortOrder.value === 'desc' ? -cmp : cmp
+      }
+      const diff = new Date(a.date).getTime() - new Date(b.date).getTime()
+      return sortOrder.value === 'desc' ? -diff : diff
+    }),
   )
+
+  function toggleDateSort() {
+    if (sortField.value === 'date') {
+      sortOrder.value = sortOrder.value === 'desc' ? 'asc' : 'desc'
+    } else {
+      sortField.value = 'date'
+      sortOrder.value = 'desc'
+    }
+  }
+
+  function toggleNameSort() {
+    if (sortField.value === 'description') {
+      sortOrder.value = sortOrder.value === 'desc' ? 'asc' : 'desc'
+    } else {
+      sortField.value = 'description'
+      sortOrder.value = 'asc'
+    }
+  }
 
   const filteredMovements = computed(() => {
     const query = normalizeSearchValue(searchQuery.value)
@@ -68,5 +95,9 @@ export function useMovementSearch(movements: Ref<Movement[]>, currency: Ref<stri
     visibleMovementCount,
     emptyStateMessage,
     handleSearchInput,
+    sortOrder,
+    sortField,
+    toggleDateSort,
+    toggleNameSort,
   }
 }

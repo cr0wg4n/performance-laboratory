@@ -1,8 +1,8 @@
 import type { LocationQuery, LocationQueryValue } from 'vue-router'
 import type { MovementQueryParams } from '@/services/api.service'
+import { config } from '@/config'
 
-const DEFAULT_PAGE = 1
-const DEFAULT_LIMIT = 100
+const { defaultPage: DEFAULT_PAGE, defaultLimit: DEFAULT_LIMIT } = config.pagination
 
 function getSingleQueryValue(value: LocationQueryValue | LocationQueryValue[] | undefined): string | undefined {
   return typeof value === 'string' ? value : undefined

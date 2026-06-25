@@ -4,7 +4,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMovementSearch } from '@/composables/useMovementSearch'
 import { useUser } from '@/composables/useUser'
-import { useMovementsStore } from '@/composables/useMovements'
+import { useMovementsStore } from '@/stores/useMovements'
 import MovementList from '@/components/movements/MovementList.vue'
 import MovementForm from '@/components/movements/MovementForm.vue'
 import SuccessCarousel from '@/components/SuccessCarousel.vue'
@@ -26,7 +26,7 @@ const deleteError = ref<string | null>(null)
 
 const currency = computed(() => user.value?.currency ?? 'USD')
 
-const { searchInput, filteredMovements, visibleMovementCount, emptyStateMessage, handleSearchInput } = useMovementSearch(movements, currency)
+const { searchInput, filteredMovements, visibleMovementCount, emptyStateMessage, handleSearchInput, sortOrder, sortField, toggleDateSort, toggleNameSort } = useMovementSearch(movements, currency)
 
 const totalIncome = computed(() =>
   movements.value.filter((m) => m.type === 'income').reduce((sum, m) => sum + m.amount, 0),
@@ -177,12 +177,28 @@ async function handleDelete(id: number) {
             <p class="text-sm text-base-content/40 mt-0.5">Search by description, amount, date, or movement type.</p>
           </div>
           <div class="flex flex-col gap-2 w-full md:max-w-sm">
-            <label class="input input-bordered flex items-center gap-2 w-full">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input :value="searchInput" type="search" class="grow" placeholder="Search all movements" @input="handleSearchInput" />
-            </label>
+            <div class="flex gap-2">
+              <label class="input input-bordered flex items-center gap-2 flex-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input :value="searchInput" type="search" class="grow" placeholder="Search all movements" @input="handleSearchInput" />
+              </label>
+              <button class="btn btn-outline btn-sm h-auto gap-1.5" :class="{ 'btn-active': sortField === 'date' }" @click="toggleDateSort">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7l4-4m0 0l4 4m-4-4v18" v-if="sortField === 'date' && sortOrder === 'asc'" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 17l-4 4m0 0l-4-4m4 4V3" v-else />
+                </svg>
+                {{ sortField === 'date' && sortOrder === 'asc' ? 'Oldest' : 'Newest' }}
+              </button>
+              <button class="btn btn-outline btn-sm h-auto gap-1.5" :class="{ 'btn-active': sortField === 'description' }" @click="toggleNameSort">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7l4-4m0 0l4 4m-4-4v18" v-if="sortField === 'description' && sortOrder === 'asc'" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 17l-4 4m0 0l-4-4m4 4V3" v-else />
+                </svg>
+                {{ sortField === 'description' && sortOrder === 'desc' ? 'Zyx' : 'Abc' }}
+              </button>
+            </div>
             <span class="text-right text-base-content/40 text-sm tabular-nums">{{ visibleMovementCount }} results</span>
           </div>
         </div>

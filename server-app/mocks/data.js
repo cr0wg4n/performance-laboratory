@@ -97,7 +97,7 @@ for (let month = 0; month < 1000; month++) {
   }
 }
 
-movements.sort((a, b) => new Date(a.date) - new Date(b.date))
+movements.sort((a, b) => new Date(b.date) - new Date(a.date))
 movements.forEach((m, i) => { m.id = i + 1 })
 
 export { movements }

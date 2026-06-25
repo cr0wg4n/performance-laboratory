@@ -1,5 +1,5 @@
 {
-  "watch": ["src/"],
+  "watch": ["src/", "mocks/"],
   "ext": "js,json",
   "ignore": ["node_modules/"]
 }

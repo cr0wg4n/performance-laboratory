@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref } from 'vue'
 import { useUser } from '@/composables/useUser'
-import { useMovementsStore } from '@/composables/useMovements'
+import { useMovementsStore } from '@/stores/useMovements'
 import { formatCurrency } from '@/utils/format.util'
 import SuccessCarousel from '@/components/SuccessCarousel.vue'
 import InsightsChart from '@/components/insights/InsightsChart.vue'
