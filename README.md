@@ -4,6 +4,9 @@ This repository contains a functional application that is intentionally designed
 ## Requirements
 - Node 24.XX or higher
 - pnpm - I prefer pnpm over npm, but you can use npm if you want, check this [article](https://javascript.plainenglish.io/why-i-choose-pnpm-over-npm-every-time-a77283ae4d49?sharedUserId=cr0wg4n).
+```
+npm install -g pnpm
+```
 
 
 ## Installation and Setup

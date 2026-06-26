@@ -7,11 +7,14 @@ import { useUser } from '@/composables/useUser'
 import { useMovementsStore } from '@/stores/useMovements'
 import MovementList from '@/components/movements/MovementList.vue'
 import MovementForm from '@/components/movements/MovementForm.vue'
-import SuccessCarousel from '@/components/SuccessCarousel.vue'
+// import SuccessCarousel from '@/components/SuccessCarousel.vue'
 import { formatCurrency } from '@/utils/format.util'
 import { getMovementQueryParams } from '@/utils/movement-query.util'
 import type { MovementPayload } from '@/types'
+import { defineAsyncComponent } from 'vue'
 
+
+const SuccessCarousel = defineAsyncComponent(() => import('@/components/SuccessCarousel.vue'))
 const { user, fetchUser } = useUser()
 const movementsStore = useMovementsStore()
 const { movements, isLoading, error } = storeToRefs(movementsStore)

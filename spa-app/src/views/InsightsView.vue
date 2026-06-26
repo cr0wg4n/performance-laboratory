@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { computed, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { useUser } from '@/composables/useUser'
 import { useMovementsStore } from '@/stores/useMovements'
 import { formatCurrency } from '@/utils/format.util'
-import SuccessCarousel from '@/components/SuccessCarousel.vue'
 import InsightsChart from '@/components/insights/InsightsChart.vue'
+
+const SuccessCarousel = defineAsyncComponent(() => import('@/components/SuccessCarousel.vue'))
 import {
   buildInsightSeries,
   buildInsightSummary,

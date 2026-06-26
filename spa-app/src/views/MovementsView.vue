@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMovementSearch } from '@/composables/useMovementSearch'
 import { useUser } from '@/composables/useUser'
 import { useMovementsStore } from '@/stores/useMovements'
-import SuccessCarousel from '@/components/SuccessCarousel.vue'
 import MovementList from '@/components/movements/MovementList.vue'
+
+const SuccessCarousel = defineAsyncComponent(() => import('@/components/SuccessCarousel.vue'))
 import { formatCurrency } from '@/utils/format.util'
 import { getMovementQueryParams } from '@/utils/movement-query.util'
 

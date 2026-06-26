@@ -12,7 +12,7 @@ export default defineConfig({
     vue(),
     vueDevTools(),
     tailwindcss(),
-    analyzer()
+    analyzer({ openAnalyzer: false, enabled: false, })
   ],
   resolve: {
     alias: {
