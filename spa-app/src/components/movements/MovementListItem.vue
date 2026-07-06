@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import type { Movement } from '@/types'
 import { formatCurrency, formatDate } from '@/utils/format.util'
 
@@ -28,10 +28,6 @@ const movementMeta = computed(() => {
     sign: props.movement.type === 'outcome' ? '−' : '+',
   }
 })
-
-watch(() => props.movement, () => {
-  void movementMeta.value
-}, { deep: true, immediate: true })
 
 function handleDelete() {
   emit('delete', props.movement.id)

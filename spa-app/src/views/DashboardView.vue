@@ -1,24 +1,21 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, inject, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMovementSearch } from '@/composables/useMovementSearch'
-import { useUser } from '@/composables/useUser'
-import { useMovementsStore } from '@/stores/useMovements'
+import { useMovements } from '@/composables/useMovements'
 import MovementList from '@/components/movements/MovementList.vue'
 import MovementForm from '@/components/movements/MovementForm.vue'
-// import SuccessCarousel from '@/components/SuccessCarousel.vue'
+import AppPagination from '@/components/AppPagination.vue'
 import { formatCurrency } from '@/utils/format.util'
 import { getMovementQueryParams } from '@/utils/movement-query.util'
-import type { MovementPayload } from '@/types'
+import type { MovementPayload, User } from '@/types'
 import { defineAsyncComponent } from 'vue'
+import type { Ref } from 'vue'
 
 
 const SuccessCarousel = defineAsyncComponent(() => import('@/components/SuccessCarousel.vue'))
-const { user, fetchUser } = useUser()
-const movementsStore = useMovementsStore()
-const { movements, isLoading, error } = storeToRefs(movementsStore)
-const { fetchMovements, addMovement, removeMovement } = movementsStore
+const user = inject<Ref<User | null>>('user')!
+const { movements, isLoading, error, fetchMovements, addMovement, removeMovement } = useMovements()
 const route = useRoute()
 
 const showForm = ref(false)
@@ -29,7 +26,7 @@ const deleteError = ref<string | null>(null)
 
 const currency = computed(() => user.value?.currency ?? 'USD')
 
-const { searchInput, filteredMovements, visibleMovementCount, emptyStateMessage, handleSearchInput, sortOrder, sortField, toggleDateSort, toggleNameSort } = useMovementSearch(movements, currency)
+const { searchInput, paginatedMovements, currentPage, totalPages, goToPage, visibleMovementCount, emptyStateMessage, handleSearchInput, sortOrder, sortField, toggleDateSort, toggleNameSort } = useMovementSearch(movements, currency)
 
 const totalIncome = computed(() =>
   movements.value.filter((m) => m.type === 'income').reduce((sum, m) => sum + m.amount, 0),
@@ -40,15 +37,10 @@ const totalExpenses = computed(() =>
 )
 
 async function loadData() {
-  await fetchUser()
   await fetchMovements(getMovementQueryParams(route.query))
 }
 
 onMounted(loadData)
-watch(() => route.query.page, loadData)
-watch(() => route.query.limit, loadData)
-watch(() => route.path, loadData)
-watch(() => route.name, loadData)
 
 function handleOpenForm() {
   formError.value = null
@@ -210,13 +202,14 @@ async function handleDelete(id: number) {
           </div>
         </div>
         <MovementList
-          :movements="filteredMovements"
+          :movements="paginatedMovements"
           :currency="currency"
           :is-loading="isLoading"
           :deleting-id="deletingId"
           :empty-message="emptyStateMessage"
           @delete="handleDelete"
         />
+        <AppPagination :current-page="currentPage" :total-pages="totalPages" @change="goToPage" />
       </div>
     </div>
 

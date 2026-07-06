@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, provide } from 'vue'
 import { useUser } from '@/composables/useUser'
 import AppNavbar from '@/components/AppNavbar.vue'
 
 const { user, fetchUser } = useUser()
+
+provide('user', user)
 
 onMounted(fetchUser)
 </script>

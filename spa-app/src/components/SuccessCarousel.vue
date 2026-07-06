@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import CarlosImg from '@/assets/pictures/carlos.jpg'
-import JamesImg from '@/assets/pictures/james.jpg'
-import PriyaImg from '@/assets/pictures/priya.jpg'
-import SarahImg from '@/assets/pictures/sarah.jpg'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 interface Story {
   id: number
@@ -18,7 +14,7 @@ interface Story {
   achievementBg: string
   achievementText: string
   progressColor: string
-  image: string
+  imageLoader: () => Promise<{ default: string }>
 }
 
 const baseStories: Story[] = [
@@ -35,7 +31,7 @@ const baseStories: Story[] = [
     achievementBg: "bg-success/10",
     achievementText: "text-success",
     progressColor: "bg-success",
-    image: SarahImg,
+    imageLoader: () => import('@/assets/pictures/sarah.webp'),
   },
   {
     id: 2,
@@ -50,7 +46,7 @@ const baseStories: Story[] = [
     achievementBg: "bg-primary/10",
     achievementText: "text-primary",
     progressColor: "bg-primary",
-    image: JamesImg,
+    imageLoader: () => import('@/assets/pictures/james.jpg'),
   },
   {
     id: 3,
@@ -65,7 +61,7 @@ const baseStories: Story[] = [
     achievementBg: "bg-secondary/10",
     achievementText: "text-secondary",
     progressColor: "bg-secondary",
-    image: PriyaImg,
+    imageLoader: () => import('@/assets/pictures/priya.jpg'),
   },
   {
     id: 4,
@@ -80,7 +76,7 @@ const baseStories: Story[] = [
     achievementBg: "bg-accent/10",
     achievementText: "text-accent",
     progressColor: "bg-accent",
-    image: CarlosImg,
+    imageLoader: () => import('@/assets/pictures/carlos.jpg'),
   },
 ]
 
@@ -102,6 +98,7 @@ const stories = ref<Story[]>([...baseStories])
 const currentIndex = ref(0)
 const currentStory = computed<Story>(() => stories.value[currentIndex.value]!)
 const expandedStoryId = ref<number | null>(null)
+const loadedImages = ref<Record<number, string>>({})
 
 const currentPreviewQuote = computed(() => {
   const quote = currentStory.value.quote.trim()
@@ -115,11 +112,25 @@ const currentPreviewQuote = computed(() => {
 })
 
 const isCurrentStoryExpanded = computed(() => expandedStoryId.value === currentStory.value.id)
+const currentImage = computed(() => loadedImages.value[currentStory.value.id] ?? '')
 
 const isPaused = ref(false)
+let timerId: ReturnType<typeof setInterval> | null = null
+
+function stopTimer() {
+  if (timerId !== null) {
+    clearInterval(timerId)
+    timerId = null
+  }
+}
 
 function startTimer() {
-  setInterval(() => goTo(currentIndex.value + 1), INTERVAL_MS)
+  stopTimer()
+  timerId = setInterval(() => {
+    currentIndex.value = (currentIndex.value + 1) % stories.value.length
+    expandedStoryId.value = null
+    preloadAdjacentImages()
+  }, INTERVAL_MS)
 }
 
 function goTo(index: number) {
@@ -128,11 +139,13 @@ function goTo(index: number) {
   if (next === currentIndex.value) return
   currentIndex.value = next
   expandedStoryId.value = null
+  preloadAdjacentImages()
   if (!isPaused.value) startTimer()
 }
 
 function pauseTimer() {
   isPaused.value = true
+  stopTimer()
 }
 
 function resumeTimer() {
@@ -144,10 +157,28 @@ function toggleStoryExpansion() {
   expandedStoryId.value = isCurrentStoryExpanded.value ? null : currentStory.value.id
 }
 
+async function loadImage(story: Story) {
+  if (story.id in loadedImages.value) return
+  const mod = await story.imageLoader()
+  loadedImages.value[story.id] = mod.default
+}
+
+function preloadAdjacentImages() {
+  const len = stories.value.length
+  const nextIndex = (currentIndex.value + 1) % len
+  void loadImage(stories.value[nextIndex]!)
+}
+
 onMounted(() => {
   stories.value = shuffleStories(baseStories)
   currentIndex.value = 0
+  void loadImage(stories.value[0]!)
+  preloadAdjacentImages()
   startTimer()
+})
+
+onUnmounted(() => {
+  stopTimer()
 })
 </script>
 
@@ -169,8 +200,8 @@ onMounted(() => {
 
       <div class="flex items-center gap-1.5">
         <button
-          v-for="(_, i) in stories"
-          :key="i"
+          v-for="(story, i) in stories"
+          :key="story.id"
           class="p-0.5 rounded-full focus:outline-none"
           :aria-label="`Go to story ${i + 1}`"
           @click="goTo(i)"
@@ -219,7 +250,7 @@ onMounted(() => {
             <div class="flex items-center gap-2.5">
               <div class="avatar avatar-placeholder shrink-0">
                 <div class="w-9 rounded-full" :class="[currentStory.avatarBg, currentStory.avatarContent]">
-                  <img :src="currentStory.image" alt="">
+                  <img v-if="currentImage" :src="currentImage" alt="">
                 </div>
               </div>
               <div class="flex-1 min-w-0">

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
-import { useUser } from '@/composables/useUser'
-import { useMovementsStore } from '@/stores/useMovements'
+import { computed, defineAsyncComponent, inject, onMounted, ref } from 'vue'
+import type { Ref } from 'vue'
+import { useMovements } from '@/composables/useMovements'
 import { formatCurrency } from '@/utils/format.util'
 import InsightsChart from '@/components/insights/InsightsChart.vue'
+import type { User } from '@/types'
 
 const SuccessCarousel = defineAsyncComponent(() => import('@/components/SuccessCarousel.vue'))
 import {
@@ -17,10 +17,8 @@ import {
   type DateRange,
 } from '@/utils/insights.util'
 
-const { user, fetchUser } = useUser()
-const movementsStore = useMovementsStore()
-const { movements, isLoading, error } = storeToRefs(movementsStore)
-const { fetchMovements } = movementsStore
+const user = inject<Ref<User | null>>('user')!
+const { movements, isLoading, error, fetchMovements } = useMovements()
 
 const dateRange = ref<DateRange>(createDefaultDateRange())
 
@@ -54,8 +52,11 @@ function setQuickRange(days: number) {
   }
 }
 
-onMounted(async () => {
-  await Promise.all([fetchUser(), fetchMovements()])
+onMounted(() => {
+  fetchMovements({
+    limit: 200,
+    page:1
+  })
 })
 </script>
 

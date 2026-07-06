@@ -2,11 +2,12 @@ import { ref } from 'vue'
 import { apiService } from '@/services/api.service'
 import type { User } from '@/types'
 
-export function useUser() {
-  const user = ref<User | null>(null)
-  const isLoading = ref(false)
-  const error = ref<string | null>(null)
+const user = ref<User | null>(null)
+const isLoading = ref(false)
+const error = ref<string | null>(null)
+let pollingStarted = false
 
+export function useUser() {
   async function fetchUser() {
     isLoading.value = true
     error.value = null
@@ -19,9 +20,10 @@ export function useUser() {
     }
   }
 
-  setInterval(() => void fetchUser(), 2000)
-  window.addEventListener('focus', () => void fetchUser())
-  window.addEventListener('visibilitychange', () => void fetchUser())
+  if (!pollingStarted) {
+    pollingStarted = true
+    setInterval(() => void fetchUser(), 10000)
+  }
 
   return { user, isLoading, error, fetchUser }
 }

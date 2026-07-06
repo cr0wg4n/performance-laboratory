@@ -48,8 +48,8 @@ function handleDelete(id: number) {
 
     <template v-else>
       <MovementListItem
-        v-for="(movement, index) in movements"
-        :key="index"
+        v-for="movement in movements"
+        :key="movement.id"
         :movement="movement"
         :currency="currency"
         :deleting-id="deletingId"

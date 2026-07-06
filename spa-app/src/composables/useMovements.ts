@@ -1,9 +1,8 @@
-import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { apiService, type MovementQueryParams } from '@/services/api.service'
 import type { Movement, MovementPayload } from '@/types'
 
-export const useMovementsStore = defineStore('movements', () => {
+export function useMovements() {
   const movements = ref<Movement[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
@@ -53,4 +52,4 @@ export const useMovementsStore = defineStore('movements', () => {
     addMovement,
     removeMovement,
   }
-})
+}

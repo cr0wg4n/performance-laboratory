@@ -1,7 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import DashboardView from '@/views/DashboardView.vue'
-import MovementsView from '@/views/MovementsView.vue'
-import InsightsView from '@/views/InsightsView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -9,24 +6,24 @@ const router = createRouter({
     {
       path: '/',
       name: 'dashboard',
-      component: DashboardView,
+      component: () => import('@/views/DashboardView.vue')
     },
     {
       path: '/income',
       name: 'income',
-      component: MovementsView,
+      component: () => import('@/views/MovementsView.vue'),
       props: { type: 'income' as const },
     },
     {
       path: '/outcome',
       name: 'outcome',
-      component: MovementsView,
+      component: () => import('@/views/MovementsView.vue'),
       props: { type: 'outcome' as const },
     },
     {
       path: '/insights',
       name: 'insights',
-      component: InsightsView,
+      component: () => import('@/views/InsightsView.vue'),
     },
   ],
 })

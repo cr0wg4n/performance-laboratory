@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, inject, onMounted, ref, watch } from 'vue'
+import type { Ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMovementSearch } from '@/composables/useMovementSearch'
-import { useUser } from '@/composables/useUser'
-import { useMovementsStore } from '@/stores/useMovements'
+import { useMovements } from '@/composables/useMovements'
 import MovementList from '@/components/movements/MovementList.vue'
+import AppPagination from '@/components/AppPagination.vue'
+import type { User } from '@/types'
 
 const SuccessCarousel = defineAsyncComponent(() => import('@/components/SuccessCarousel.vue'))
 import { formatCurrency } from '@/utils/format.util'
@@ -17,10 +18,8 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const { user, fetchUser } = useUser()
-const movementsStore = useMovementsStore()
-const { movements, isLoading, error } = storeToRefs(movementsStore)
-const { fetchIncome, fetchOutcome, removeMovement } = movementsStore
+const user = inject<Ref<User | null>>('user')!
+const { movements, isLoading, error, fetchIncome, fetchOutcome, removeMovement } = useMovements()
 const route = useRoute()
 
 const deletingId = ref<number | null>(null)
@@ -29,19 +28,15 @@ const deleteError = ref<string | null>(null)
 const currency = computed(() => user.value?.currency ?? 'USD')
 const total = computed(() => movements.value.reduce((sum, m) => sum + m.amount, 0))
 
-const { searchInput, filteredMovements, visibleMovementCount, emptyStateMessage, handleSearchInput, sortOrder, sortField, toggleDateSort, toggleNameSort } = useMovementSearch(movements, currency)
+const { searchInput, paginatedMovements, currentPage, totalPages, goToPage, visibleMovementCount, emptyStateMessage, handleSearchInput, sortOrder, sortField, toggleDateSort, toggleNameSort } = useMovementSearch(movements, currency)
 
 async function loadData() {
   const params = getMovementQueryParams(route.query)
-  await fetchUser()
   await (props.type === 'income' ? fetchIncome(params) : fetchOutcome(params))
 }
 
 onMounted(loadData)
 watch(() => props.type, loadData)
-watch(() => route.query.page, loadData)
-watch(() => route.query.limit, loadData)
-watch(() => route.name, loadData)
 
 async function handleDelete(id: number) {
   deletingId.value = id
@@ -145,13 +140,14 @@ async function handleDelete(id: number) {
           </div>
         </div>
         <MovementList
-          :movements="filteredMovements"
+          :movements="paginatedMovements"
           :currency="currency"
           :is-loading="isLoading"
           :deleting-id="deletingId"
           :empty-message="emptyStateMessage"
           @delete="handleDelete"
         />
+        <AppPagination :current-page="currentPage" :total-pages="totalPages" @change="goToPage" />
       </div>
     </div>
   </div>
