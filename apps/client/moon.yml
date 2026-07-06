@@ -1,0 +1,18 @@
+language: 'typescript'
+
+project: 
+  name: 'client'
+  description: 'A Vue 3 project'
+
+tasks:
+  build:
+    command: 'pnpm build'
+    inputs:
+      - 'src/**/*'
+    outputs:
+      - 'dist'
+
+  dev:
+    command: 'pnpm dev'
+    inputs:
+      - 'src/**/*'

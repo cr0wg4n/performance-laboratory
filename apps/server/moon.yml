@@ -1,0 +1,11 @@
+language: 'typescript'
+
+project: 
+  name: 'server'
+  description: 'A Node.js server project'
+
+tasks:
+  dev:
+    command: 'pnpm dev'
+    inputs:
+      - 'src/**/*'

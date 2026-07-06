@@ -1,7 +1,7 @@
 {
-  "name": "server-app",
+  "name": "server",
   "version": "1.0.0",
-  "description": "",
+  "description": "A Node.js server project",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/index.js"

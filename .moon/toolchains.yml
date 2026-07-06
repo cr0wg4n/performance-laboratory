@@ -1,0 +1,8 @@
+typescript:
+  packageManager: 'pnpm'
+
+node:
+  version: '24.14.1'
+
+pnpm:
+  version: '11.10.0'
