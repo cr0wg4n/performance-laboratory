@@ -3,6 +3,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "scripts": {
+    "dev": "moon run :dev",
+    "build": "moon run :build"
+  },
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
@@ -10,5 +14,8 @@
       "onFail": "download"
     }
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@moonrepo/cli": "^2.4.5"
+  }
 }
